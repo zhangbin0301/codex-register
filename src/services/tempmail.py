@@ -260,6 +260,7 @@ class TempmailService(BaseEmailService):
                     if not message_id or message_id in seen_ids:
                         continue
                     seen_ids.add(message_id)
+                    message_marker = f"id:{message_id}"
 
                     sender = str(msg.get("from", "")).lower()
                     subject = str(msg.get("subject", ""))
@@ -276,6 +277,8 @@ class TempmailService(BaseEmailService):
                     match = re.search(pattern, content)
                     if match:
                         code = match.group(1)
+                        if not self._accept_verification_code(email, code, message_marker):
+                            continue
                         logger.info(f"找到验证码: {code}")
                         self.update_status(True)
                         return code
